@@ -1,0 +1,10 @@
+[package]
+name = "rust_deltalake_poc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+deltalake = { version = "0.17.3", features = ["datafusion"] }
+log = "0.4.21"
+simple_logger = "4.3.3"
+tokio = "1.37.0"
