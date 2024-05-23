@@ -15,5 +15,5 @@ pip-install:
     pip install -r requirements.txt
 
 # read delta table:
-read-delta version="1":
+read-delta version='':
     python polars_read.py {{ version }}

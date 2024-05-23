@@ -4,18 +4,22 @@ from pathlib import Path
 import polars as pl
 
 
-def read_table(table_version: int = 1):
+def read_table(table_version: int | None):
     file_path = "delta/source_table_bronze"
 
-    delta_log_files = (Path(file_path) / "_delta_log").glob("*")
-    max_table_version = max(
-        int(i.name.split(".")[0]) for i in delta_log_files if i.is_file()
-    )
-    if table_version > max_table_version:
-        print(f"Version requested does not exist. Max version: {max_table_version}")
-        sys.exit()
+    kwargs = dict(source=file_path)
 
-    df = pl.read_delta(file_path, version=table_version)
+    if table_version is not None:
+        delta_log_files = (Path(file_path) / "_delta_log").glob("*")
+        max_table_version = max(
+            int(i.name.split(".")[0]) for i in delta_log_files if i.is_file()
+        )
+        if table_version > max_table_version:
+            print(f"Version requested does not exist. Max version: {max_table_version}")
+            sys.exit()
+        kwargs["version"] = table_version
+
+    df = pl.read_delta(**kwargs)
     print(df)
 
 
@@ -47,7 +51,7 @@ def create_table(feed_number: int = 1):
 
 if __name__ == "__main__":
     args = sys.argv
-    table_version = 1
+    table_version = None
     if len(args) > 1:
         table_version = int(args[1])
 
