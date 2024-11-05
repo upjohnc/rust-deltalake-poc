@@ -36,7 +36,7 @@ impl CustomerAmount {
     }
 }
 
-async fn retriev_source_data(file_parquet: &str) -> Vec<RecordBatch> {
+async fn retrieve_source_data(file_parquet: &str) -> Vec<RecordBatch> {
     let context = SessionContext::new();
     let field_id = Field::new("id", ArrowDataType::Int32, true);
     let field_name = Field::new("name", ArrowDataType::Utf8, true);
@@ -90,11 +90,19 @@ async fn main() {
 
     let table = get_table(&table_path).await;
 
-    let table_write = DeltaOps(table)
-        .write(retriev_source_data(&file_parquet).await)
+    let table_write = DeltaOps(table.clone())
+        .write(retrieve_source_data(&file_parquet).await)
         .with_schema_mode(SchemaMode::Merge)
         .await
         .unwrap();
+    let table = get_table(&table_path).await;
+
+    match deltalake::checkpoints::create_checkpoint(&table).await {
+        Ok(_) => info!("Successfully created checkpoint"),
+        Err(e) => {
+            println!("Failed to create checkpoint for {table_path}: {e:?}")
+        }
+    }
 
     info!("Table Save: {}", table_write);
 }

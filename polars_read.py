@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 
+import pandas as pd
 import polars as pl
 
 
@@ -49,6 +50,15 @@ def create_table(feed_number: int = 1):
     df.write_parquet(file_name)
 
 
+def read_checkpoint():
+    df = pd.read_parquet(
+        "/Users/charlesupjohn/projects/rust_learning/rust_deltalake_poc/delta/source_table_bronze/_delta_log/00000000000000000001.checkpoint.parquet",
+        engine="pyarrow",
+    )
+    breakpoint()
+    print(df.head())
+
+
 if __name__ == "__main__":
     args = sys.argv
     table_version = None
@@ -57,3 +67,4 @@ if __name__ == "__main__":
 
     read_table(table_version)
     # create_table(feed_number=table_version)
+    # read_checkpoint()
